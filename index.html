@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcs Dice Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .debug-info {
+            font-family: monospace;
+            white-space: pre;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Arcs Dice Combat Simulator</h1>
+    
+    <div class="input-section">
+        <h2>Attacker Fleet</h2>
+        <div class="input-group">
+            <label for="attacker-undamaged">Undamaged ships:</label>
+            <input type="number" id="attacker-undamaged" min="0" value="5">
+        </div>
+        <div class="input-group">
+            <label for="attacker-damaged">Damaged ships:</label>
+            <input type="number" id="attacker-damaged" min="0" value="0">
+        </div>
+
+        <h2>Defender Fleet</h2>
+        <div class="input-group">
+            <label for="defender-undamaged">Undamaged ships:</label>
+            <input type="number" id="defender-undamaged" min="0" value="3">
+        </div>
+        <div class="input-group">
+            <label for="defender-damaged">Damaged ships:</label>
+            <input type="number" id="defender-damaged" min="0" value="2">
+        </div>
+
+        <button onclick="runSimulation()">Run Simulation</button>
+    </div>
+
+    <div id="debug-info" class="debug-info"></div>
+    <div id="results" class="results"></div>
+
+    <script>
+        class Fleet {
+            constructor(undamaged, damaged) {
+                this.undamaged = undamaged;
+                this.damaged = damaged;
+            }
+        }
+
+        class BlueDie {
+            roll() {
+                const result = Math.floor(Math.random() * 6) + 1;
+                return result <= 3 ? [1, 0, 0] : [0, 0, 0];
+            }
+        }
+
+        class RedDie {
+            roll() {
+                const result = Math.floor(Math.random() * 6) + 1;
+                if (result === 1) return [0, 0, 0];
+                if (result === 2) return [2, 0, 0];
+                if (result === 3) return [2, 1, 0];
+                if (result === 4) return [1, 0, 1];
+                return [1, 1, 0];
+            }
+        }
+
+        function simulateCombat(attacker, defender, blueDice, redDice, simulations = 1000) {
+            let totalWipes = 0;
+            let totalLossHits = 0;
+
+            for (let i = 0; i < simulations; i++) {
+                let remainingDefenderUndamaged = defender.undamaged;
+                let remainingDefenderDamaged = defender.damaged;
+                
+                let hits = 0;
+                let selfHits = 0;
+                let intercepts = 0;
+
+                // Roll blue dice
+                for (let j = 0; j < blueDice; j++) {
+                    const [h, s, i] = new BlueDie().roll();
+                    hits += h;
+                    selfHits += s;
+                    intercepts += i;
+                }
+
+                // Roll red dice
+                for (let j = 0; j < redDice; j++) {
+                    const [h, s, i] = new RedDie().roll();
+                    hits += h;
+                    selfHits += s;
+                    intercepts += i;
+                }
+
+                // Apply hits to defender
+                const hitsToDamaged = Math.min(hits, remainingDefenderDamaged);
+                remainingDefenderDamaged -= hitsToDamaged;
+                hits -= hitsToDamaged;
+
+                const hitsToUndamaged = Math.min(hits, remainingDefenderUndamaged);
+                remainingDefenderUndamaged -= hitsToUndamaged;
+
+                if (remainingDefenderDamaged === 0 && remainingDefenderUndamaged === 0) {
+                    totalWipes++;
+                }
+
+                // Calculate losses from intercepts and self-hits
+                if (intercepts > 0) {
+                    const hitsFromIntercept = defender.undamaged * intercepts;
+                    let remainingHits = hitsFromIntercept;
+                    let remainingUndamaged = attacker.undamaged;
+                    let remainingDamaged = attacker.damaged;
+
+                    const hitsToDamaged = Math.min(remainingHits, remainingDamaged);
+                    totalLossHits += hitsToDamaged;
+                    remainingHits -= hitsToDamaged;
+
+                    const hitsToUndamaged = Math.min(remainingHits, remainingUndamaged);
+                    totalLossHits += hitsToUndamaged * 2;
+                }
+
+                // Apply self hits
+                let remainingHits = selfHits;
+                let remainingUndamaged = attacker.undamaged;
+                let remainingDamaged = attacker.damaged;
+
+                const selfHitsToDamaged = Math.min(remainingHits, remainingDamaged);
+                totalLossHits += selfHitsToDamaged;
+                remainingHits -= selfHitsToDamaged;
+
+                const selfHitsToUndamaged = Math.min(remainingHits, remainingUndamaged);
+                totalLossHits += selfHitsToUndamaged * 2;
+            }
+
+            return [totalWipes / simulations, totalLossHits / simulations];
+        }
+
+        function optimizeDiceAllocation(attacker, defender) {
+            const totalDice = attacker.undamaged + attacker.damaged;
+            let bestLossHits = Infinity;
+            let bestAllocation = [0, 0];
+            let bestWipeChance = 0;
+            
+            let debugInfo = "";
+
+            for (let blueDice = 0; blueDice <= totalDice; blueDice++) {
+                const redDice = totalDice - blueDice;
+                const [wipeChance, avgLossHits] = simulateCombat(attacker, defender, blueDice, redDice);
+                
+                debugInfo += `Blue: ${blueDice}, Red: ${redDice}, Wipe chance: ${(wipeChance * 100).toFixed(1)}%, Losses: ${avgLossHits.toFixed(2)}\n`;
+
+                if (wipeChance >= 0.5 && avgLossHits < bestLossHits) {
+                    bestLossHits = avgLossHits;
+                    bestAllocation = [blueDice, redDice];
+                    bestWipeChance = wipeChance;
+                }
+            }
+
+            document.getElementById('debug-info').textContent = debugInfo;
+            return [...bestAllocation, bestWipeChance, bestLossHits];
+        }
+
+        function runSimulation() {
+            const attacker = new Fleet(
+                parseInt(document.getElementById('attacker-undamaged').value),
+                parseInt(document.getElementById('attacker-damaged').value)
+            );
+            const defender = new Fleet(
+                parseInt(document.getElementById('defender-undamaged').value),
+                parseInt(document.getElementById('defender-damaged').value)
+            );
+
+            const [blue, red, wipeChance, lossHits] = optimizeDiceAllocation(attacker, defender);
+            
+            const resultsDiv = document.getElementById('results');
+            if (wipeChance >= 0.5) {
+                resultsDiv.innerHTML = `
+                    <h3>Results:</h3>
+                    <p>Optimal allocation: ${blue} blue dice, ${red} red dice</p>
+                    <p>Chance to eliminate all enemy ships: ${(wipeChance * 100).toFixed(1)}%</p>
+                    <p>Expected friendly losses: ${lossHits.toFixed(2)} hits</p>
+                    <p><i>(Note: Destroying an undamaged ship counts as 2 hits)</i></p>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <h3>Results:</h3>
+                    <p>No dice allocation found that achieves 50% chance of eliminating all enemy ships</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

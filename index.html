@@ -10,6 +10,14 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #121212;
+            color: #00ff88;
+        }
+        h1, h2 {
+            color: #00ffff;
+        }
+        label {
+            color: #ff00ff;
         }
         .input-group {
             margin: 10px 0;
@@ -17,13 +25,128 @@
         .results {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #333;
             border-radius: 4px;
+            background-color: #1a1a1a;
+            color: #00ffff;
         }
         .debug-info {
             font-family: monospace;
             white-space: pre;
             margin-top: 20px;
+            color: #00ff88;
+        }
+        .number-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+        }
+        .number-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .number-btn:hover {
+            background: #1a1a7a;
+            border-color: #0056b3;
+        }
+        .number-btn.selected {
+            background: #007bff;
+            color: white;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px #007bff;
+        }
+        .simulate-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #00ff88;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px #00ff8855;
+        }
+        .simulate-btn:hover {
+            background: #00cc6f;
+            box-shadow: 0 0 20px #00ff88;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: monospace;
+            color: #fff;
+        }
+        .results-table th, .results-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .results-table th {
+            background-color: #1a1a1a;
+            color: #00ffff;
+            font-weight: bold;
+        }
+        .results-table tr:hover {
+            background-color: #1f1f1f;
+        }
+        .viable-solution {
+            background-color: #1a2f1a;
+        }
+        .viable-solution:hover {
+            background-color: #234023;
+        }
+
+        /* Attacker buttons */
+        #attacker-undamaged-buttons .number-btn,
+        #attacker-damaged-buttons .number-btn {
+            border-color: #1a1a7a;
+        }
+
+        #attacker-undamaged-buttons .number-btn:hover,
+        #attacker-damaged-buttons .number-btn:hover {
+            background: #1a1a7a;
+            border-color: #0056b3;
+        }
+
+        #attacker-undamaged-buttons .number-btn.selected,
+        #attacker-damaged-buttons .number-btn.selected {
+            background: #007bff;
+            color: white;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px #007bff;
+        }
+
+        /* Defender buttons */
+        #defender-undamaged-buttons .number-btn,
+        #defender-damaged-buttons .number-btn {
+            border-color: #7a1a1a;
+        }
+
+        #defender-undamaged-buttons .number-btn:hover,
+        #defender-damaged-buttons .number-btn:hover {
+            background: #7a1a1a;
+            border-color: #b30000;
+        }
+
+        #defender-undamaged-buttons .number-btn.selected,
+        #defender-damaged-buttons .number-btn.selected {
+            background: #ff0000;
+            color: white;
+            border-color: #ff6666;
+            box-shadow: 0 0 10px #ff0000;
         }
     </style>
 </head>
@@ -33,25 +156,65 @@
     <div class="input-section">
         <h2>Attacker Fleet</h2>
         <div class="input-group">
-            <label for="attacker-undamaged">Undamaged ships:</label>
-            <input type="number" id="attacker-undamaged" min="0" value="5">
+            <label>Undamaged ships:</label>
+            <div class="number-buttons" id="attacker-undamaged-buttons">
+                <button class="number-btn selected" data-value="0">0</button>
+                <button class="number-btn" data-value="1">1</button>
+                <button class="number-btn" data-value="2">2</button>
+                <button class="number-btn" data-value="3">3</button>
+                <button class="number-btn" data-value="4">4</button>
+                <button class="number-btn" data-value="5">5</button>
+                <button class="number-btn" data-value="6">6</button>
+                <button class="number-btn" data-value="7">7</button>
+                <button class="number-btn" data-value="8">8</button>
+            </div>
         </div>
         <div class="input-group">
-            <label for="attacker-damaged">Damaged ships:</label>
-            <input type="number" id="attacker-damaged" min="0" value="0">
+            <label>Damaged ships:</label>
+            <div class="number-buttons" id="attacker-damaged-buttons">
+                <button class="number-btn selected" data-value="0">0</button>
+                <button class="number-btn" data-value="1">1</button>
+                <button class="number-btn" data-value="2">2</button>
+                <button class="number-btn" data-value="3">3</button>
+                <button class="number-btn" data-value="4">4</button>
+                <button class="number-btn" data-value="5">5</button>
+                <button class="number-btn" data-value="6">6</button>
+                <button class="number-btn" data-value="7">7</button>
+                <button class="number-btn" data-value="8">8</button>
+            </div>
         </div>
 
         <h2>Defender Fleet</h2>
         <div class="input-group">
-            <label for="defender-undamaged">Undamaged ships:</label>
-            <input type="number" id="defender-undamaged" min="0" value="3">
+            <label>Undamaged ships:</label>
+            <div class="number-buttons" id="defender-undamaged-buttons">
+                <button class="number-btn selected" data-value="0">0</button>
+                <button class="number-btn" data-value="1">1</button>
+                <button class="number-btn" data-value="2">2</button>
+                <button class="number-btn" data-value="3">3</button>
+                <button class="number-btn" data-value="4">4</button>
+                <button class="number-btn" data-value="5">5</button>
+                <button class="number-btn" data-value="6">6</button>
+                <button class="number-btn" data-value="7">7</button>
+                <button class="number-btn" data-value="8">8</button>
+            </div>
         </div>
         <div class="input-group">
-            <label for="defender-damaged">Damaged ships:</label>
-            <input type="number" id="defender-damaged" min="0" value="2">
+            <label>Damaged ships:</label>
+            <div class="number-buttons" id="defender-damaged-buttons">
+                <button class="number-btn selected" data-value="0">0</button>
+                <button class="number-btn" data-value="1">1</button>
+                <button class="number-btn" data-value="2">2</button>
+                <button class="number-btn" data-value="3">3</button>
+                <button class="number-btn" data-value="4">4</button>
+                <button class="number-btn" data-value="5">5</button>
+                <button class="number-btn" data-value="6">6</button>
+                <button class="number-btn" data-value="7">7</button>
+                <button class="number-btn" data-value="8">8</button>
+            </div>
         </div>
 
-        <button onclick="runSimulation()">Run Simulation</button>
+        <button class="simulate-btn" onclick="runSimulation()">Run Simulation</button>
     </div>
 
     <div id="debug-info" class="debug-info"></div>
@@ -87,6 +250,9 @@
             let totalWipes = 0;
             let totalLossHits = 0;
 
+            // Calculate total hits needed to wipe defender
+            const hitsNeededForWipe = (defender.undamaged * 2) + defender.damaged;
+
             for (let i = 0; i < simulations; i++) {
                 let remainingDefenderUndamaged = defender.undamaged;
                 let remainingDefenderDamaged = defender.damaged;
@@ -111,15 +277,30 @@
                     intercepts += i;
                 }
 
-                // Apply hits to defender
-                const hitsToDamaged = Math.min(hits, remainingDefenderDamaged);
-                remainingDefenderDamaged -= hitsToDamaged;
-                hits -= hitsToDamaged;
+                // Apply hits to defender - NEW LOGIC
+                while (hits > 0) {
+                    if (remainingDefenderDamaged > 0) {
+                        // First hit damaged ships (they only need 1 hit)
+                        remainingDefenderDamaged--;
+                        hits--;
+                    } else if (remainingDefenderUndamaged > 0) {
+                        if (hits >= 2) {
+                            // Destroy an undamaged ship if we have 2+ hits
+                            remainingDefenderUndamaged--;
+                            hits -= 2;
+                        } else {
+                            // Damage an undamaged ship if we have 1 hit
+                            remainingDefenderUndamaged--;
+                            remainingDefenderDamaged++;
+                            hits--;
+                        }
+                    } else {
+                        break;
+                    }
+                }
 
-                const hitsToUndamaged = Math.min(hits, remainingDefenderUndamaged);
-                remainingDefenderUndamaged -= hitsToUndamaged;
-
-                if (remainingDefenderDamaged === 0 && remainingDefenderUndamaged === 0) {
+                // Check if all ships were destroyed
+                if (remainingDefenderUndamaged === 0 && remainingDefenderDamaged === 0) {
                     totalWipes++;
                 }
 
@@ -156,37 +337,78 @@
 
         function optimizeDiceAllocation(attacker, defender) {
             const totalDice = attacker.undamaged + attacker.damaged;
-            let bestLossHits = Infinity;
-            let bestAllocation = [0, 0];
-            let bestWipeChance = 0;
-            
-            let debugInfo = "";
+            const maxPossibleHits = totalDice * 2; // Maximum possible hits (all red dice rolling 2 hits)
+            const hitsNeededForWipe = (defender.undamaged * 2) + defender.damaged;
+
+            // Early exit if mathematically impossible to achieve a wipe
+            if (maxPossibleHits < hitsNeededForWipe) {
+                document.getElementById('debug-info').textContent = 
+                    `Wipe impossible: Need ${hitsNeededForWipe} hits but can only deal maximum ${maxPossibleHits} hits`;
+                return [0, 0, 0, 0];
+            }
+
+            let tableData = [];
+            let debugInfo = "<table class='results-table'>";
+            debugInfo += `
+                <tr>
+                    <th>Blue Dice</th>
+                    <th>Red Dice</th>
+                    <th>Expected Hits</th>
+                    <th>Expected Losses</th>
+                    <th>Net Hits</th>
+                    <th>Wipe Chance</th>
+                </tr>
+            `;
 
             for (let blueDice = 0; blueDice <= totalDice; blueDice++) {
                 const redDice = totalDice - blueDice;
                 const [wipeChance, avgLossHits] = simulateCombat(attacker, defender, blueDice, redDice);
                 
-                debugInfo += `Blue: ${blueDice}, Red: ${redDice}, Wipe chance: ${(wipeChance * 100).toFixed(1)}%, Losses: ${avgLossHits.toFixed(2)}\n`;
+                // Calculate expected hits (blue dice give 0.5 hits on average, red dice give 1.17 hits on average)
+                const expectedHits = (blueDice * 0.5) + (redDice * 1.17);
+                const netHits = expectedHits - avgLossHits;
+                
+                debugInfo += `
+                    <tr class="${wipeChance >= 0.5 ? 'viable-solution' : ''}">
+                        <td>${blueDice}</td>
+                        <td>${redDice}</td>
+                        <td>${expectedHits.toFixed(1)}</td>
+                        <td>${avgLossHits.toFixed(1)}</td>
+                        <td>${netHits.toFixed(1)}</td>
+                        <td>${(wipeChance * 100).toFixed(1)}%</td>
+                    </tr>
+                `;
 
-                if (wipeChance >= 0.5 && avgLossHits < bestLossHits) {
-                    bestLossHits = avgLossHits;
-                    bestAllocation = [blueDice, redDice];
-                    bestWipeChance = wipeChance;
+                // Store data for finding best solution
+                tableData.push([blueDice, redDice, wipeChance, avgLossHits]);
+            }
+
+            debugInfo += "</table>";
+            document.getElementById('debug-info').innerHTML = debugInfo;
+
+            let bestLossHits = Infinity;
+            let bestAllocation = [0, 0];
+            let bestWipeChance = 0;
+            
+            for (let i = 0; i < tableData.length; i++) {
+                if (tableData[i][2] >= 0.5 && tableData[i][3] < bestLossHits) {
+                    bestLossHits = tableData[i][3];
+                    bestAllocation = tableData[i];
+                    bestWipeChance = tableData[i][2];
                 }
             }
 
-            document.getElementById('debug-info').textContent = debugInfo;
             return [...bestAllocation, bestWipeChance, bestLossHits];
         }
 
         function runSimulation() {
             const attacker = new Fleet(
-                parseInt(document.getElementById('attacker-undamaged').value),
-                parseInt(document.getElementById('attacker-damaged').value)
+                parseInt(document.querySelector('#attacker-undamaged-buttons .selected').dataset.value),
+                parseInt(document.querySelector('#attacker-damaged-buttons .selected').dataset.value)
             );
             const defender = new Fleet(
-                parseInt(document.getElementById('defender-undamaged').value),
-                parseInt(document.getElementById('defender-damaged').value)
+                parseInt(document.querySelector('#defender-undamaged-buttons .selected').dataset.value),
+                parseInt(document.querySelector('#defender-damaged-buttons .selected').dataset.value)
             );
 
             const [blue, red, wipeChance, lossHits] = optimizeDiceAllocation(attacker, defender);
@@ -207,6 +429,27 @@
                 `;
             }
         }
+
+        function initializeNumberButtons() {
+            const groups = ['attacker-undamaged', 'attacker-damaged', 
+                          'defender-undamaged', 'defender-damaged'];
+            
+            groups.forEach(groupId => {
+                const container = document.getElementById(groupId + '-buttons');
+                container.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('number-btn')) {
+                        // Deselect all buttons in this group
+                        container.querySelectorAll('.number-btn').forEach(btn => {
+                            btn.classList.remove('selected');
+                        });
+                        // Select clicked button
+                        e.target.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeNumberButtons);
     </script>
 </body>
 </html> 
